@@ -1,0 +1,9 @@
+*.csv
+*.rda
+*.html
+*.jpg
+*.pdf
+*.wflow
+
+draft
+dumps

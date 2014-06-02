@@ -51,7 +51,7 @@ for(i in names(coms)[ order(coms) ]) {
   d = subset(data, committee == i & n_au > 1)
   
   total = sum(d$n_au)
-  msg(i, titles[ i], total, "sponsorships")
+  cat(i, titles[ i ], ":", total, "sponsorships ... ")
   
   if(!file.exists(paste0("data/com_", i, ".rda"))) {
     
@@ -105,6 +105,10 @@ for(i in names(coms)[ order(coms) ]) {
     save(n, g, e, d, file = paste0("data/com_", i, ".rda"))
     
   }
+  
+  load(paste0("data/com_", i, ".rda"))
+  
+  cat(network.size(n), "nodes", network.edgecount(n), "edges\n")
   
 }
 

@@ -2,6 +2,7 @@
 *.rda
 *.jpg
 *.pdf
+*.pxm
 *.wflow
 
 draft
@@ -9,5 +10,3 @@ dumps
 
 .gitignore
 
-assets/hemicycle.jpg
-assets/hemicycle.pxm

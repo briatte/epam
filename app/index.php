@@ -76,12 +76,12 @@
   </title>
   <meta charset="utf-8">
   <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet" type="text/css" />
-  <link href="assets/styles.css" rel="stylesheet" type="text/css" />
-  <link rel="stylesheet" href="font-awesome-4.0.3/css/font-awesome.min.css">
+  <link href="/assets/styles.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="/font-awesome-4.0.3/css/font-awesome.min.css">
   <style type="text/css" media="screen">
   html, body {
     font: 24px/150% "Source Sans Pro", sans-serif;
-    background-image: url("assets/hemicycle.png");
+    background-image: url("/assets/hemicycle.png");
     color: #fff;
     margin: 0;
     padding:0;
@@ -90,7 +90,7 @@
   }
   </style>
   <!--[if lt IE 8]>
-    <link rel="stylesheet" href="assets/stylesheets/social_foundicons_ie7.css">
+    <link rel="stylesheet" href="/assets/stylesheets/social_foundicons_ie7.css">
   <![endif]-->
 </head>
 <body>
@@ -161,9 +161,9 @@
 
 </div>
 
-<script src="sigmajs-release-v1.0.2/sigma.min.js"></script>
-<script src="sigmajs-release-v1.0.2/plugins/sigma.parsers.gexf.min.js"></script>
-<script src="sigmajs-release-v1.0.2/plugins/sigma.layout.forceAtlas2.min.js"></script>
+<script src="/sigmajs-release-v1.0.2/sigma.min.js"></script>
+<script src="/sigmajs-release-v1.0.2/plugins/sigma.parsers.gexf.min.js"></script>
+<script src="/sigmajs-release-v1.0.2/plugins/sigma.layout.forceAtlas2.min.js"></script>
 
 <script>
 function decimalAdjust(type, value, exp) {

@@ -3,8 +3,8 @@
 #' @source http://parltrack.euwiki.org/
 if(!file.exists("amdts.rda")) {
   
-  meps = "data/meps.csv"
-  if(!file.exists(meps)) {
+  file = "data/meps.csv"
+  if(!file.exists(file)) {
     
     msg("Extracting MEPs data...")
     
@@ -18,12 +18,33 @@ if(!file.exists("amdts.rda")) {
     name = xpathSApply(html, root("[@class='mep_name']"))
     name = sapply(name, xmlValue)
     
-    write.csv(data.frame(link, name), meps, row.names = FALSE) # , natl, party, group, member
+    meps = data.frame(link, name)
+    
+    msg("Extracting MEP nationalities...")
+
+    meps$natl = NA
+    for(i in unique(meps$link[ is.na(meps$natl) ])) {
+      
+      h = try(htmlParse(paste0("http://www.europarl.europa.eu", i)), silent = TRUE)
+      if("try-error" %in% class(h)) {
+        
+        cat("[fix] failed to scrape nationality: ", i, "\n")
+        
+      } else {
+        
+        natl = as.character(gsub("nationality ", "", xpathApply(h, "//li[contains(@class, 'nationality')]/@class")))
+        meps$natl[ meps$link == i] = natl
+        
+      }
+      
+    }
+    meps$natl[ meps$natl=="nationality" ] = NA
+    write.csv(meps[, c("link", "name", "natl") ], file, row.names = FALSE) # gender, party, group, member
     
   }
   
-  meps = read.csv(meps, stringsAsFactors = FALSE)
-  
+  meps = read.csv(file, stringsAsFactors = FALSE)
+    
   # loop twice to solve network errors
   for(i in rep(meps$link, 2)) {
     
@@ -118,23 +139,6 @@ if(!file.exists("amdts.rda")) {
 
   mandates = summarise(group_by(nfo, id), nb_mandates = 1 + max(leg) - min(leg))
   meps = left_join(meps, mandates, by = "id")
-  
-  meps$natl = NA
-  for(i in unique(meps$link[ is.na(meps$natl) ])) {
-    
-    h = try(htmlParse(paste0("http://www.europarl.europa.eu", i)), silent = TRUE)
-    if("try-error" %in% class(h)) {
-      
-      cat("[fix] failed to scrape nationality: ", i, "\n")
-
-    } else {
-
-      natl = as.character(gsub("nationality ", "", xpathApply(h, "//li[contains(@class, 'nationality')]/@class")))
-      meps$natl[ meps$link == i] = natl
-
-    }
-    
-  }
 
   # party groups
   

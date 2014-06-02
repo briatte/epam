@@ -8,21 +8,26 @@ dir.create("plots" , showWarnings = FALSE)
 
 # parser
 
-library(XML)
 library(jsonlite)
+library(XML)
 library(qdap)
 library(stringr)
 library(plyr)
 library(dplyr)
-library(qdap)
 
 # networks
 
 library(network)
+library(sna)
+library(tnet)
+library(igraph)
+
+# plots
+
 library(devtools)
 library(ggplot2)
+library(reshape2)
 library(scales)
-library(sna)
 
 source_url("https://raw.githubusercontent.com/briatte/ggnet/master/ggnet.R")
 

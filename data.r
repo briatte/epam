@@ -68,6 +68,7 @@ if(!file.exists("amdts.rda")) {
       write.csv(data.frame(id = j, info[, c(4, 1, 2:3) ]), file, row.names = FALSE)
       
     } else {
+
       f = read.csv(file, stringsAsFactors = FALSE)
       
       if(all(is.na(f$started)) | all(is.na(f$ended))) {
@@ -94,12 +95,47 @@ if(!file.exists("amdts.rda")) {
   msg("Postprocessing MEPs data...")
   
   if(!file.exists("data/nfo.csv")) {
-    nfo = build("nfo")
+    nfo = build("nfo")    
     write.csv(nfo[, c("id", "type", "org", "started", "ended") ], file = "data/nfo.csv", row.names = FALSE)
   }
   
   nfo = read.csv("data/nfo.csv", stringsAsFactors = FALSE)
+  nfo$started = as.Date(nfo$started, "%d.%m.%Y")
+  nfo$ended = as.Date(nfo$ended, "%d.%m.%Y")
   
+  nfo$leg = NA
+  nfo$leg[ !is.na(nfo$started) & nfo$started >= as.Date("1979-06-07") & nfo$started < as.Date("1984-06-07") ] = 1
+  nfo$leg[ !is.na(nfo$started) & nfo$started >= as.Date("1984-06-07") & nfo$started < as.Date("1989-06-07") ] = 2
+  nfo$leg[ !is.na(nfo$started) & nfo$started >= as.Date("1989-06-07") & nfo$started < as.Date("1994-06-07") ] = 3
+  nfo$leg[ !is.na(nfo$started) & nfo$started >= as.Date("1994-06-07") & nfo$started < as.Date("1999-06-07") ] = 4
+  nfo$leg[ !is.na(nfo$started) & nfo$started >= as.Date("1999-06-07") & nfo$started < as.Date("2004-06-07") ] = 5
+  nfo$leg[ !is.na(nfo$started) & nfo$started >= as.Date("2004-06-07") & nfo$started < as.Date("2009-06-07") ] = 6
+  nfo$leg[ !is.na(nfo$started) & nfo$started >= as.Date("2009-06-07") & nfo$started < as.Date("2014-06-07") ] = 7
+  nfo$leg[ !is.na(nfo$started) & nfo$started >= as.Date("2014-06-07") & nfo$started < as.Date("2019-06-07") ] = 8
+  nfo$leg[ !is.na(nfo$started) & nfo$started < as.Date("1979-06-07") ] = 1
+  nfo$leg[ is.na(nfo$leg) ] = 7
+  print(table(nfo$leg, exclude = NULL))
+
+  mandates = summarise(group_by(nfo, id), nb_mandates = 1 + max(leg) - min(leg))
+  meps = left_join(meps, mandates, by = "id")
+  
+  meps$natl = NA
+  for(i in unique(meps$link[ is.na(meps$natl) ])) {
+    
+    h = try(htmlParse(paste0("http://www.europarl.europa.eu", i)), silent = TRUE)
+    if("try-error" %in% class(h)) {
+      
+      cat("[fix] failed to scrape nationality: ", i, "\n")
+
+    } else {
+
+      natl = as.character(gsub("nationality ", "", xpathApply(h, "//li[contains(@class, 'nationality')]/@class")))
+      meps$natl[ meps$link == i] = natl
+
+    }
+    
+  }
+
   # party groups
   
   x = unique(nfo[ nfo$type == "group", c("id", "org") ])

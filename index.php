@@ -61,7 +61,7 @@
     "TRAN" => "");
   $class[$co] = "here";
 
-  $caption='<p>This graph shows Members of the European Parliament (MEPs) during the 7th term (2009-2014). A link between two MEPs indicates that they have cosponsored at least one amendment. See <a href="plots.html">this page</a> for more plots.</p>';
+  $caption='<p>This graph shows Members of the European Parliament (MEPs) during the 7th term (2009-2014). A link between two MEPs indicates that they have cosponsored at least one committee amendment. See <a href="plots.html" target="_blank">this page</a> for more plots.</p>';
   // $caption = $caption . ' Their size is proportional to their <a href="http://toreopsahl.com/tnet/weighted-networks/node-centrality/">weighted degree</a>.</p>'
   
 ?>
@@ -98,35 +98,35 @@
 <div id="sigma-container">
   <div id="controls" class="bg">
     <h1>european parliament</h1>    
-    <h2><a href="<?php echo "http://parltrack.euwiki.org/committee/" + $co; ?>" title="Go to Parltrack"><?php echo $array[$co]; ?></a></h2>
+    <h2><a target='_blank' href='<?php echo "http://parltrack.euwiki.org/committee/" . $co; ?>' title='Go to Parltrack committee page (new window)'><?php echo $array[$co]; ?></a></h2>
 
     <p>
       Committee&nbsp;&nbsp;
-      <a href="?co=AFCO" class='<?php echo $class["AFCO"]; ?>'>AFCO</a>&nbsp;&nbsp;
-      <a href="?co=AFET" class='<?php echo $class["AFET"]; ?>'>AFET</a>&nbsp;&nbsp;
-      <a href="?co=AGRI" class='<?php echo $class["AGRI"]; ?>'>AGRI</a>&nbsp;&nbsp;
-      <a href="?co=BUDG" class='<?php echo $class["BUDG"]; ?>'>BUDG</a>&nbsp;&nbsp;
-      <a href="?co=CONT" class='<?php echo $class["CONT"]; ?>'>CONT</a>&nbsp;&nbsp;
-      <a href="?co=CRIM" class='<?php echo $class["CRIM"]; ?>'>CRIM</a>&nbsp;&nbsp;
-      <a href="?co=CRIS" class='<?php echo $class["CRIS"]; ?>'>CRIS</a>&nbsp;&nbsp;
-      <a href="?co=CULT" class='<?php echo $class["CULT"]; ?>'>CULT</a>&nbsp;&nbsp;
-      <a href="?co=DEVE" class='<?php echo $class["DEVE"]; ?>'>DEVE</a>&nbsp;&nbsp;
-      <a href="?co=DROI" class='<?php echo $class["DROI"]; ?>'>DROI</a>&nbsp;&nbsp;
-      <a href="?co=ECON" class='<?php echo $class["ECON"]; ?>'>ECON</a>&nbsp;&nbsp;
-      <a href="?co=EMPL" class='<?php echo $class["EMPL"]; ?>'>EMPL</a>&nbsp;&nbsp;
-      <a href="?co=ENVI" class='<?php echo $class["ENVI"]; ?>'>ENVI</a>&nbsp;&nbsp;
-      <a href="?co=FEMM" class='<?php echo $class["FEMM"]; ?>'>FEMM</a>&nbsp;&nbsp;
-      <a href="?co=IMCO" class='<?php echo $class["IMCO"]; ?>'>IMCO</a>&nbsp;&nbsp;
-      <a href="?co=INTA" class='<?php echo $class["INTA"]; ?>'>INTA</a>&nbsp;&nbsp;
-      <a href="?co=ITRE" class='<?php echo $class["ITRE"]; ?>'>ITRE</a>&nbsp;&nbsp;
-      <a href="?co=JURI" class='<?php echo $class["JURI"]; ?>'>JURI</a>&nbsp;&nbsp;
-      <a href="?co=LIBE" class='<?php echo $class["LIBE"]; ?>'>LIBE</a>&nbsp;&nbsp;
-      <a href="?co=PECH" class='<?php echo $class["PECH"]; ?>'>PECH</a>&nbsp;&nbsp;
-      <a href="?co=PETI" class='<?php echo $class["PETI"]; ?>'>PETI</a>&nbsp;&nbsp;
-      <a href="?co=REGI" class='<?php echo $class["REGI"]; ?>'>REGI</a>&nbsp;&nbsp;
-      <a href="?co=SEDE" class='<?php echo $class["SEDE"]; ?>'>SEDE</a>&nbsp;&nbsp;
-      <a href="?co=SURE" class='<?php echo $class["SURE"]; ?>'>SURE</a>&nbsp;&nbsp;
-      <a href="?co=TRAN" class='<?php echo $class["TRAN"]; ?>'>TRAN</a>
+      <a href="?co=AFCO" title='<?php echo $array['AFCO']; ?>' class='<?php echo $class["AFCO"]; ?>'>AFCO</a>&nbsp;&nbsp;
+      <a href="?co=AFET" title='<?php echo $array['AFET']; ?>'  class='<?php echo $class["AFET"]; ?>'>AFET</a>&nbsp;&nbsp;
+      <a href="?co=AGRI" title='<?php echo $array['AGRI']; ?>'  class='<?php echo $class["AGRI"]; ?>'>AGRI</a>&nbsp;&nbsp;
+      <a href="?co=BUDG" title='<?php echo $array['BUDG']; ?>'  class='<?php echo $class["BUDG"]; ?>'>BUDG</a>&nbsp;&nbsp;
+      <a href="?co=CONT" title='<?php echo $array['CONT']; ?>'  class='<?php echo $class["CONT"]; ?>'>CONT</a>&nbsp;&nbsp;
+      <!-- <a href="?co=CRIM" title='<?php echo $array['CRIM']; ?>'  class='<?php echo $class["CRIM"]; ?>'>CRIM</a>&nbsp;&nbsp; -->
+      <a href="?co=CRIS" title='<?php echo $array['CRIS']; ?>'  class='<?php echo $class["CRIS"]; ?>'>CRIS</a>&nbsp;&nbsp;
+      <a href="?co=CULT" title='<?php echo $array['CULT']; ?>'  class='<?php echo $class["CULT"]; ?>'>CULT</a>&nbsp;&nbsp;
+      <a href="?co=DEVE" title='<?php echo $array['DEVE']; ?>'  class='<?php echo $class["DEVE"]; ?>'>DEVE</a>&nbsp;&nbsp;
+      <!-- <a href="?co=DROI" title='<?php echo $array['DROI']; ?>'  class='<?php echo $class["DROI"]; ?>'>DROI</a>&nbsp;&nbsp; -->
+      <a href="?co=ECON" title='<?php echo $array['ECON']; ?>'  class='<?php echo $class["ECON"]; ?>'>ECON</a>&nbsp;&nbsp;
+      <a href="?co=EMPL" title='<?php echo $array['EMPL']; ?>'  class='<?php echo $class["EMPL"]; ?>'>EMPL</a>&nbsp;&nbsp;
+      <a href="?co=ENVI" title='<?php echo $array['ENVI']; ?>'  class='<?php echo $class["ENVI"]; ?>'>ENVI</a>&nbsp;&nbsp;
+      <a href="?co=FEMM" title='<?php echo $array['FEMM']; ?>'  class='<?php echo $class["FEMM"]; ?>'>FEMM</a>&nbsp;&nbsp;
+      <a href="?co=IMCO" title='<?php echo $array['IMCO']; ?>'  class='<?php echo $class["IMCO"]; ?>'>IMCO</a>&nbsp;&nbsp;
+      <a href="?co=INTA" title='<?php echo $array['INTA']; ?>'  class='<?php echo $class["INTA"]; ?>'>INTA</a>&nbsp;&nbsp;
+      <a href="?co=ITRE" title='<?php echo $array['ITRE']; ?>'  class='<?php echo $class["ITRE"]; ?>'>ITRE</a>&nbsp;&nbsp;
+      <a href="?co=JURI" title='<?php echo $array['JURI']; ?>'  class='<?php echo $class["JURI"]; ?>'>JURI</a>&nbsp;&nbsp;
+      <a href="?co=LIBE" title='<?php echo $array['LIBE']; ?>'  class='<?php echo $class["LIBE"]; ?>'>LIBE</a>&nbsp;&nbsp;
+      <a href="?co=PECH" title='<?php echo $array['PECH']; ?>'  class='<?php echo $class["PECH"]; ?>'>PECH</a>&nbsp;&nbsp;
+      <a href="?co=PETI" title='<?php echo $array['PETI']; ?>'  class='<?php echo $class["PETI"]; ?>'>PETI</a>&nbsp;&nbsp;
+      <a href="?co=REGI" title='<?php echo $array['REGI']; ?>'  class='<?php echo $class["REGI"]; ?>'>REGI</a>&nbsp;&nbsp;
+      <!-- <a href="?co=SEDE" title='<?php echo $array['SEDE']; ?>'  class='<?php echo $class["SEDE"]; ?>'>SEDE</a>&nbsp;&nbsp; -->
+      <a href="?co=SURE" title='<?php echo $array['SURE']; ?>'  class='<?php echo $class["SURE"]; ?>'>SURE</a>&nbsp;&nbsp;
+      <a href="?co=TRAN" title='<?php echo $array['TRAN']; ?>'  class='<?php echo $class["TRAN"]; ?>'>TRAN</a>
     </p>
     <p>
       Click a node to show its ego network. Double click to zoom in or out.<br>
@@ -148,10 +148,10 @@
       <br>
       Download&nbsp;&nbsp;<i class="fa fa-file-o"></i>&nbsp;&nbsp;<a href="com_<?php echo $co; ?>.gexf" title="Download this graph (GEXF, readable with Gephi)">network</a>&nbsp;&nbsp;<i class="fa fa-files-o"></i>&nbsp;&nbsp;<a href="all.zip" title="Download all graphs (GEXF, readable with Gephi)">full series</a></p>
     <p><a href="#" id="recenter-camera" class="button" title="Reset graph to initial zoom position.">reset zoom</a>&nbsp;&nbsp;<a href="#" id="toggle-layout" class="button" title="Animate with Force Atlas 2.">Animate</a> <small><a href="https://gephi.org/2011/forceatlas2-the-new-version-of-our-home-brew-layout/" title="Details on the Force Atlas 2 algorithm."><i class="fa fa-info-circle"></i></a></small></p>
-
+    <p><a href="http://twitter.com/share?text=Cosponsorship%20networks%20in%20the%20European%20Parliament,%20by%20@phnk:&amp;url=<?php echo 'http://' . $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"]; ?>" class="button" title="Share this page on Twitter."><i class="fa fa-twitter"></i> Tweet</a>&nbsp;&nbsp;<a href="https://github.com/briatte/epam" class="button" title="Get the code and data from GitHub."><i class="fa fa-github"></i> Code</a></p>
     <footer>
-        <p>Background photo by <a href="https://commons.wikimedia.org/wiki/File:EP_Strasbourg_hemicycle_l-gal.jpg">JLogan</a> (Wikimedia).</p>
-        <p><a href="http://twitter.com/share?text=Cosponsorship%20networks%20in%20the%20French%20Parliament,%20by%20@phnk:&amp;url=<?php echo 'http://' . $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"]; ?>" class="button" title="Share this page on Twitter."><i class="fa fa-twitter"></i> Tweet</a>&nbsp;&nbsp;<a href="https://github.com/briatte/epam" class="button" title="Get the code and data from GitHub."><i class="fa fa-github"></i> Code</a></p>
+        <p>Amendments data from <a href="http://parltrack.euwiki.org/dumps/" title="Index of Parltrack /dumps/">Parltrack</a> (May 16, 2014).<br />
+          Background photo by <a href="https://commons.wikimedia.org/wiki/File:EP_Strasbourg_hemicycle_l-gal.jpg">JLogan</a> (Wikimedia).</p>
     </footer>
     <div id="graph-container"></div>
   </div>
@@ -259,22 +259,10 @@ sigma.parsers.gexf(
       // node color
       var rgba = e.data.node.color;
 
-      // explicit party groups
-      group = e.data.node.attributes['group'];
-      party = "?";
-      if(group == "CEN") party = "Centrists";
-      if(group == "COM") party = "Communists";
-      if(group == "SOC") party = "Socialists";
-      if(group == "DRO") party = "Conservatives";
-      if(group == "FN") party = "Front National";
-      if(group == "RAD") party = "Radicals";
-      if(group == "ECO") party = "Greens";
-      if(group == "SE") party = "unaffiliated";
+      profile = "<a href='http://www.europarl.europa.eu" + e.data.node.attributes['link'] + "' title='Go to EP profile (new window)' target='_blank'>";
+      parltrack = "<a href='http://parltrack.euwiki.org/mep/" + e.data.node.attributes['label'] + "' title='Go to Parltrack profile (new window)' target='_blank'";
       
-      profile = "<a href='http://www.europarl.europa.eu" + e.data.node.attributes['link'] + "' title='Go to profile (new window)' target='_blank'>";
-      parltrack = "<a href='http://parltrack.euwiki.org/mep/" + e.data.node.attributes['label'] + "' title='Go to Parltrack profile (new window)' target='_blank'>";
-      
-      document.getElementById('caption').innerHTML = '<p style="background:' + rgba + ';">' + profile + '<img src="http://www.europarl.europa.eu/mepphoto/' + e.data.node.attributes['uid'] + '.jpg" alt="no photo available" /></a> You selected <span style="text-transform:uppercase;">' + profile + e.data.node.label + '</a></span> <span style="color:' + rgba.replace('0.3)', '1)') + ';">(' + group + ')</span>, an MEP who had <span title="unweighted Freeman degree">' + s.graph.getNeighborsCount(nodeId) + ' cosponsors</span> in this committee over the entire term.<br /><a href="#" class="button" style="width: 175px; margin:1.25em 0; float:none;" title="Go to the Parltrack profile for this MEP.">Parltrack profile</a></p>';
+      document.getElementById('caption').innerHTML = '<p style="background:' + rgba + ';">' + profile + '<img src="http://www.europarl.europa.eu/mepphoto/' + e.data.node.attributes['uid'] + '.jpg" alt="no photo available" /></a> You selected <span style="text-transform:uppercase;">' + profile + e.data.node.label + '</a></span> <span style="color:' + rgba.replace('0.3)', '1)') + ';">(' + e.data.node.attributes['group'] + ')</span>, an MEP who had <span title="unweighted Freeman degree">' + s.graph.getNeighborsCount(nodeId) + ' cosponsors</span> in this committee over the entire term.<br /><a href="http://www.europarl.europa.eu' + e.data.node.attributes['link'] + '" class="button"" style="width: 125px; margin:1.25em 0; float:none;" title="Go to EP profile (new window)" target="_blank">EP homepage</a>&nbsp;&nbsp; ' + parltrack + '" class="button" style="width: 175px; margin:1.25em 0; float:none;" target="_blank">Parltrack profile</a></p>';
       
       // Since the data has been modified, we need to
       // call the refresh method to make the colors

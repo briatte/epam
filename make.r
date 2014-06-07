@@ -21,6 +21,7 @@ library(network)
 library(sna)
 library(tnet)
 library(igraph)
+library(rgexf)
 
 # plots
 

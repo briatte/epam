@@ -1,7 +1,7 @@
 #' Extract amendments from the Parltrack data dump
 #' 
 #' @source http://parltrack.euwiki.org/
-if(!file.exists("amdts.rda")) {
+if(!file.exists("data/amdts.rda")) {
   
   file = "data/meps.csv"
   if(!file.exists(file)) {
@@ -138,6 +138,7 @@ if(!file.exists("amdts.rda")) {
   print(table(nfo$leg, exclude = NULL))
 
   mandates = summarise(group_by(nfo, id), nb_mandates = 1 + max(leg) - min(leg))
+  meps$id = as.integer(gsub("\\D", "", meps$link))
   meps = left_join(meps, mandates, by = "id")
 
   # party groups
@@ -178,7 +179,7 @@ if(!file.exists("amdts.rda")) {
   y[ grepl("^Soc", y) ] = "Socialists"
   y[ grepl("^Lib|^Rad", y) ] = "Centrists"
   y[ grepl("^Conserv|^Eurosk", y) ] = "Euroskeptics" # merged conservatives
-  y[ grepl("^Christ", y) ] = "Christian-Democrats" #
+  y[ grepl("^Christ", y) ] = "Christian-Democrats"
   y[ grepl("^Extr|^Natl", y) ] = "Extreme-right" # merged natl-conservatives from legislatures 5-6
   y[ grepl("^Indep", y) ] = "Independents"
   
@@ -444,7 +445,7 @@ if(!file.exists("amdts.rda")) {
   
   data$authors = fix(data$authors)
   
-  noise = c("", "ECR", "Artus", "Agustín Díaz de Mera Gacía Consuegra", "Bogdan", "Sławomir")
+  noise = c("", "Artus", "Bogdan", "ECR", "Sławomir")
   
   uniq = scrubber(unlist(strsplit(data$authors, ",")))
   uniq = sort(unique(tolower(uniq[ !uniq %in% noise ])))
@@ -459,6 +460,6 @@ if(!file.exists("amdts.rda")) {
   
 }
 
-save(data, meps, nfo, file = "amdts.rda")
+save(data, meps, nfo, file = "data/amdts.rda")
 
 # kthxbye

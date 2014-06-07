@@ -61,7 +61,7 @@
     "TRAN" => "");
   $class[$co] = "here";
 
-  $caption='<p>This graph shows Members of the European Parliament (MEPs) during the 7th term (2009-2014). A link between two MEPs indicates that they have cosponsored at least one committee amendment. See <a href="plots.html" target="_blank">this page</a> for more plots.</p>';
+  $caption='<p>This graph shows Members of the European Parliament (MEPs) during the 7th term (2009-2014). A link between two MEPs indicates that they have cosponsored at least one committee amendment. The size of the nodes is proportional to their <a href="http://toreopsahl.com/tnet/weighted-networks/node-centrality/">weighted degree</a>. See <a href="plots.html" target="_blank">this page</a> for more plots.</p>';
   // $caption = $caption . ' Their size is proportional to their <a href="http://toreopsahl.com/tnet/weighted-networks/node-centrality/">weighted degree</a>.</p>'
   
 ?>
@@ -262,7 +262,7 @@ sigma.parsers.gexf(
       profile = "<a href='http://www.europarl.europa.eu" + e.data.node.attributes['link'] + "' title='Go to EP profile (new window)' target='_blank'>";
       parltrack = "<a href='http://parltrack.euwiki.org/mep/" + e.data.node.attributes['label'] + "' title='Go to Parltrack profile (new window)' target='_blank'";
       
-      document.getElementById('caption').innerHTML = '<p style="background:' + rgba + ';">' + profile + '<img src="http://www.europarl.europa.eu/mepphoto/' + e.data.node.attributes['uid'] + '.jpg" alt="no photo available" /></a> You selected <span style="text-transform:uppercase;">' + profile + e.data.node.label + '</a></span> <span style="color:' + rgba.replace('0.3)', '1)') + ';">(' + e.data.node.attributes['group'] + ')</span>, an MEP who had <span title="unweighted Freeman degree">' + s.graph.getNeighborsCount(nodeId) + ' cosponsors</span> in this committee over the entire term.<br /><a href="http://www.europarl.europa.eu' + e.data.node.attributes['link'] + '" class="button"" style="width: 125px; margin:1.25em 0; float:none;" title="Go to EP profile (new window)" target="_blank">EP homepage</a>&nbsp;&nbsp; ' + parltrack + '" class="button" style="width: 175px; margin:1.25em 0; float:none;" target="_blank">Parltrack profile</a></p>';
+      document.getElementById('caption').innerHTML = '<p style="background:' + rgba + ';">' + profile + '<img src="http://www.europarl.europa.eu/mepphoto/' + e.data.node.attributes['uid'] + '.jpg" alt="no photo available" /></a> You selected <span style="text-transform:uppercase;">' + profile + e.data.node.label + '</a></span> <span style="color:' + rgba.replace('0.3)', '1)') + ';">(' + e.data.node.attributes['group'] + ')</span>, an MEP from ' + e.data.node.attributes['natl'] + ' who had <span title="unweighted Freeman degree">' + s.graph.getNeighborsCount(nodeId) + ' cosponsor(s)</span> in this committee over the entire term.<br /><a href="http://www.europarl.europa.eu' + e.data.node.attributes['link'] + '" class="button"" style="width: 125px; margin:1.25em 0; float:none;" title="Go to EP profile (new window)" target="_blank">EP homepage</a>&nbsp;&nbsp; ' + parltrack + '" class="button" style="width: 175px; margin:1.25em 0; float:none;" target="_blank">Parltrack profile</a></p>';
       
       // Since the data has been modified, we need to
       // call the refresh method to make the colors

@@ -1,13 +1,45 @@
 #' Build committee-specific amendment cosponsorship networks
 #' 
 #' @references http://www.europarl.europa.eu/committees/en/full-list.html
-load('amdts.rda')
+load("data/amdts.rda")
 
-export = FALSE
+plot = FALSE
+gexf = TRUE
+zip = TRUE
 
-sponsors = unique(meps[, c("link", "name", "id", "group") ])
+sponsors = unique(meps[, c("link", "name", "id", "group", "natl") ])
 sponsors$group = factor(sponsors$group, levels = names(groups), ordered = TRUE)
 rownames(sponsors) = tolower(sponsors$name)
+
+countries = c(
+  "at" = "Austria",
+  "be" = "Belgium",
+  "bg" = "Bulgaria",
+  "cy" = "Cyprus",
+  "cz" = "the Czech Republic",
+  "de" = "Germany",
+  "dk" = "Denmark",
+  "ee" = "Estonia",
+  "es" = "Spain",
+  "fi" = "Finland",
+  "fr" = "France",
+  "gb" = "Great Britain",
+  "gr" = "Greece",
+  "hr" = "Croatia",
+  "hu" = "Hungary",
+  "ie" = "Ireland",
+  "it" = "Italy",
+  "lt" = "Lithuania",
+  "lu" = "the Tax Haven of Luxembourg",
+  "lv" = "Latvia",
+  "mt" = "Malta",
+  "nl" = "the Netherlands",
+  "pl" = "Poland",
+  "pt" = "Portugal",
+  "ro" = "Romania",
+  "se" = "Sweden",
+  "si" = "Slovenia",
+  "sk" = "Slovakia")
 
 groups = c(
   "Far-left" = "#E41A1C",
@@ -50,7 +82,7 @@ titles = c("AFCO" = "Constitutional Affairs",
 coms = table(unlist(strsplit(data$committee, ";")))
 results = data.frame()
 
-for(i in names(coms)[ order(coms) ]) {
+for(i in names(coms)[ order(sort(coms)) ]) {
 
   d = subset(data, committee == i & n_au > 1)
   
@@ -61,7 +93,7 @@ for(i in names(coms)[ order(coms) ]) {
   if(!file.exists(file)) {
     
     n = lapply(tolower(d$authors), function(x) {
-
+      
       x = strsplit(x, ",")
       x = sapply(x, scrubber)
       x = x[ x %in% tolower(sponsors$name) ]
@@ -78,20 +110,16 @@ for(i in names(coms)[ order(coms) ]) {
       })
     
     # edge list
-    n = rbind.fill(n)
-    names(n) = c("i", "j")
+    e = rbind.fill(n)
+    names(e) = c("i", "j")
     
     # edge weights
-    n$w = paste(n$i, n$j, sep = "_")
-    count = table(n$w)
-    n$w = count[ n$w ]
-    n = unique(n)
+    e$w = paste(e$i, e$j, sep = "_")
+    count = table(e$w)
+    e$w = count[ e$w ]
+    e = unique(e)
     
-    #   d3SimpleNetwork(n, file = paste0("plots/", i, ".html"), charge = -100)
-    #   e = groups[ sponsors[ n$i, "group" ] ]
-    
-    e = n
-    n = network(n[, 1:2 ], directed = FALSE)
+    n = network(e[, 1:2 ], directed = FALSE)
     n %n% "meta" = i
     
     network::set.edge.attribute(n, "source", as.character(e[, 1]))
@@ -100,6 +128,37 @@ for(i in names(coms)[ order(coms) ]) {
     network::set.edge.attribute(n, "alpha", as.numeric(cut(n %e% "weight", c(1:4, Inf), include.lowest = TRUE)) / 5)
     
     n %v% "group" = as.character(sponsors[ tolower(network.vertex.names(n)), "group" ])
+    n %v% "natl" = as.character(sponsors[ tolower(network.vertex.names(n)), "natl" ])
+    
+    # weighted adjacency matrix to tnet
+    tnet = as.tnet(as.sociomatrix(n, attrname = "weight"), type = "weighted one-mode tnet")
+    
+    # weighted degree and distance
+    wdeg = as.data.frame(degree_w(tnet, measure = "degree"))
+    dist = distance_w(tnet)
+    wdeg$distance = NA
+    wdeg[ attr(dist, "nodes"), ]$distance = colMeans(dist, na.rm = TRUE)
+    wdeg = cbind(wdeg, clustering_local_w(tnet)[, 2])
+    names(wdeg) = c("node", "degree", "distance", "clustering")
+    
+    n %v% "degree" = wdeg$degree
+    n %n% "degree" = mean(wdeg$degree, na.rm = TRUE)
+    
+    n %v% "distance" = wdeg$distance
+    n %n% "distance" = mean(wdeg$distance, na.rm = TRUE)
+
+    n %v% "clustering" = wdeg$clustering    # local
+    n %n% "clustering" = clustering_w(tnet) # global
+
+    save(n, e, d, file = file) # network, edges and data
+    
+  }
+  
+  load(file)
+  cat(network.size(n), "nodes", network.edgecount(n), "edges\n")
+  
+  if(plot) {
+
     g = ggnet(n, segment.color = groups[ sponsors[ e$i, "group" ] ],
               segment.alpha = n %e% "alpha",
               node.group = n %v% "group", node.color = groups[ unique(n %v% "group") ], size = 0) +
@@ -113,15 +172,9 @@ for(i in names(coms)[ order(coms) ]) {
     ggsave(paste0("plots/", i, ".pdf"), g, width = 11, height = 11)
     ggsave(paste0("plots/", i, ".jpg"), g + labs(title = NULL) + guides(color = FALSE), width = 6, height = 6)
     
-    save(n, g, e, d, file = file)
-    
   }
   
-  load(file)
-  cat(network.size(n), "nodes", network.edgecount(n), "edges\n")
-  
-  file = paste0("data/com_", i, ".gexf")
-  if(!file.exists(file) & export) {
+  if(gexf) {
     
     colors = t(col2rgb(groups[ names(groups) %in% as.character(n %v% "group") ]))
     
@@ -131,8 +184,10 @@ for(i in names(coms)[ order(coms) ]) {
                 keywords = "Parliament, European Union")
     
     people = sponsors[ network.vertex.names(n), ]
-
-    node.att = cbind(label = tolower(people$name), people[, c("name", "group", "link", "id") ])
+    people[ tolower(network.vertex.names(n)), "degree" ] = n %v% "degree"
+    
+    node.att = c("name", "group", "natl", "link", "id", "degree")
+    node.att = cbind(label = tolower(people$name), people[, node.att ])
     
     people = data.frame(id = as.numeric(factor(tolower(people$name))),
                         label = tolower(people$name),
@@ -173,27 +228,25 @@ for(i in names(coms)[ order(coms) ]) {
                nodesAtt = data.frame(label = node.att$label,
                                      name = node.att$name,
                                      group = node.att$group,
+                                     natl = countries[ node.att$natl ],
                                      uid = node.att$id,
                                      link = node.att$link,
                                      stringsAsFactors = FALSE),
                nodesVizAtt = list(position = position,
                                   color = nodecolors,
-                                  size = rep(1, nrow(people))), # , size = node.att[, nodes ]
+                                  size = round(node.att$degree)),
                # edgesVizAtt = list(size = relations[, 3]),
                defaultedgetype = "undirected", meta = meta,
-               output = file)
+               output = gsub(".rda", ".gexf", file))
     
   }
-  
+
   file = paste0("data/mod_", i, ".rda")
   if(!file.exists(file)) {
     
-    # weighted adjacency matrix to tnet
-    tnet = as.tnet(as.sociomatrix(n, attrname = "weight"), type = "weighted one-mode tnet")
-    
     # symmetrise for undirected algorithms 
     tnet = symmetrise_w(tnet, method = "AMEAN")
-    
+        
     # rename vertices
     tnet = data.frame(
       i = network.vertex.names(n)[ tnet[, 1] ],
@@ -207,15 +260,6 @@ for(i in names(coms)[ order(coms) ]) {
     
     # merge appended sponsors to main groups
     s = n %v% "group"
-    #   if(sum(s == "ECO", na.rm = TRUE) < 10 & any(s == "ECO"))
-    #     s[ s == "ECO" ] = "SOC"
-    #   if(sum(s == "COM", na.rm = TRUE) < 10 & any(s == "COM"))
-    #     s[ s == "COM" ] = "SOC"
-    
-    # drop unaffiliated sponsors
-    s = ifelse(s == "SE", NA, s)
-    
-    # get MP parliamentary groups
     names(s) = network.vertex.names(n)
     
     # subset to nonmissing groups
@@ -260,50 +304,57 @@ for(i in names(coms)[ order(coms) ]) {
                              Edges = network.edgecount(n),
                              Density = network.density(n),
                              # weighted graph-level
-#                              Centralization = net %n% "degree",
-#                              Distance = net %n% "distance",
-#                              Global.Clustering = net %n% "clustering",
+                             Centralization = n %n% "degree",
+                             Distance = n %n% "distance",
+                             Global.Clustering = n %n% "clustering",
                              # maximized modularity
                              Modularity = modularity,
                              Modularity.Max = modularity_max,
                              Modularity.Ratio = modularity / modularity_max,
                              stringsAsFactors = FALSE))
 
-  g = qplot(data = results,
-            size = I(4),
-            x = Modularity,
-            color = Modularity.Ratio,
-            y = reorder(Committee, Modularity.Ratio),
-            label = Committee, geom = "text") +
-    scale_color_gradient(low = "steelblue", high = "darkred") +
-    geom_point(aes(x = Modularity.Max), size = 3, color = "grey50") +
-    geom_point(aes(x = Modularity.Max), size = 2, color = "white") +
-    geom_vline(xintercept = mean(results$Modularity), linetype = "dashed") +
-    geom_vline(xintercept = mean(results$Modularity.Max), linetype = "dotted") +
-    labs(y = NULL, x = "\nModularity") +
-    theme_bw(16) +
-    theme(legend.justification=c(0,1), legend.position=c(0,1),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank())
-  
-  ggsave("plots/modularity.pdf", g, width = 6, height = 6)
-  ggsave("plots/modularity.png", g, width = 6, height = 6)
-  
-  g = qplot(data = results,
-            x = Edges,
-            y = Vertices,
-            size = Density,
-            label = Committee, geom = "text") +
-    scale_size_continuous(range = c(3, 6)) +
-    geom_vline(xintercept = mean(results$Edges), linetype = "dashed") +
-    geom_hline(yintercept = mean(results$Vertices), linetype = "dashed") +
-    labs(y = "Nodes\n", x = "\nEdges") +
-    theme_bw(16) +
-    theme(legend.justification=c(0,1), legend.position=c(0,1))
-  
-  ggsave("plots/density.pdf", g, width = 10, height = 9)
-  ggsave("plots/density.png", g, width = 10, height = 9)
-
 }
+
+# plots
+
+g = qplot(data = results,
+          size = I(4),
+          x = Modularity,
+          color = Modularity.Ratio,
+          y = reorder(Committee, Modularity.Ratio),
+          label = Committee, geom = "text") +
+  scale_color_gradient(low = "steelblue", high = "darkred") +
+  geom_point(aes(x = Modularity.Max), size = 3, color = "grey50") +
+  geom_point(aes(x = Modularity.Max), size = 2, color = "white") +
+  geom_vline(xintercept = mean(results$Modularity), linetype = "dashed") +
+  geom_vline(xintercept = mean(results$Modularity.Max), linetype = "dotted") +
+  labs(y = "EP committee\n", x = "\nModularity (empirical and maximized)") +
+  theme_bw(16) +
+  theme(legend.justification=c(0,1), legend.position=c(0,1),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line.y = element_line(color = "grey10"))
+
+ggsave("plots/modularity.pdf", g, width = 9, height = 9)
+ggsave("plots/modularity.png", g, width = 9, height = 9)
+
+g = qplot(data = results,
+          x = Edges,
+          y = Vertices,
+          size = Density,
+          label = Committee, geom = "text") +
+  scale_size_continuous(range = c(3, 6)) +
+  geom_vline(xintercept = mean(results$Edges), linetype = "dashed") +
+  geom_hline(yintercept = mean(results$Vertices), linetype = "dashed") +
+  labs(y = "Nodes (MEPs)\n", x = "\nEdges (cosponsorships)") +
+  theme_bw(16) +
+  theme(legend.justification=c(0,1), legend.position=c(0,1),
+        axis.line.y = element_line(color = "grey10"))
+
+ggsave("plots/density.pdf", g, width = 10, height = 9)
+ggsave("plots/density.png", g, width = 10, height = 9)
+
+if(zip)
+  zip("all.zip", paste0("data/", dir("data", "gexf")))
 
 # have a nice day

@@ -3,10 +3,14 @@
 *.jpg
 *.pdf
 *.pxm
-*.wflow
 
 draft
 dumps
+gexf
+
+*.Rproj
+.Rapp.history
+.Rproj.user
 
 .gitignore
 

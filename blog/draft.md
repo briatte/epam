@@ -93,4 +93,4 @@ Last, it should be stressed that the results reported here are strictly explorat
 [tmc-mudde]: http://www.washingtonpost.com/blogs/monkey-cage/wp/2014/02/11/the-le-pen-wilders-alliance-and-the-european-parliament-plus-ca-change-plus-cest-la-meme/
 [tmc-devries]: http://www.washingtonpost.com/blogs/monkey-cage/wp/2014/05/26/are-european-parliamentarians-responsive-to-their-voters/
 
-<!-- XXX words -->
+<!-- approx. 1,200 words excluding links -->

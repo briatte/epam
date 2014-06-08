@@ -7,7 +7,7 @@ plot = FALSE
 gexf = TRUE
 zip = TRUE
 
-sponsors = unique(meps[, c("link", "name", "id", "group", "natl") ])
+sponsors = unique(meps[, c("link", "name", "id", "group", "natl", "nb_mandates") ])
 sponsors$group = factor(sponsors$group, levels = names(groups), ordered = TRUE)
 rownames(sponsors) = tolower(sponsors$name)
 
@@ -129,6 +129,7 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     
     n %v% "group" = as.character(sponsors[ tolower(network.vertex.names(n)), "group" ])
     n %v% "natl" = as.character(sponsors[ tolower(network.vertex.names(n)), "natl" ])
+    n %v% "nb_mandates" = as.character(sponsors[ tolower(network.vertex.names(n)), "nb_mandates" ])
     
     # weighted adjacency matrix to tnet
     tnet = as.tnet(as.sociomatrix(n, attrname = "weight"), type = "weighted one-mode tnet")

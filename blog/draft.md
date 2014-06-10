@@ -24,7 +24,7 @@ A cursory look at the entire collection of networks indicates that yes, MEPs do 
 
 These patterns depend partly on the number of committee members and the frequency of cosponsorship between them. Both dimensions appear in the figure below, where every acronym is an EP committee, sized proportionally to the [density][density] of its network.
 
-![](../plots/density.png)
+![](density.png)
 
 In the plot above, the smallest and sparsest networks are displayed at the bottom left, whereas the largest and densest EP committees are shown in the top right quadrant, above the average number of nodes and edges marked by dashed lines.
 
@@ -36,7 +36,7 @@ Moving on to the degree of collaborativeness between MEPs, the next figure shows
 
 Two measures of modularity are displayed below: the _empirical_ score of each committee is calculated against its party groups, while the _maximized_ score (shown as grey dots) is the algorithmically computed maximum modularity that might be reached in the network, given its edge structure. The dashed and dotted lines respectively mark average empirical and maximized modularity.
 
-![](../plots/modularity.png)
+![](modularity.png)
 
 The plot above also shows the ratio of empirical to maximized modularity, from blue (low) to red (high). By that measure, some committees like Fisheries and Petitions express very low polarization, while others, like Foreign Affairs ([AFET][ep-afet]) or Development ([DEVE][ep-deve]), are more divided. (It seems reasonable to ignore the [SURE][ep-sure] and [CRIS][ep-cris] committees here: both had a short lifespan, and their networks are excessively sparse).
 

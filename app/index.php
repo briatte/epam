@@ -81,7 +81,7 @@
   <style type="text/css" media="screen">
   html, body {
     font: 24px/150% "Source Sans Pro", sans-serif;
-    background-image: url("/assets/hemicycle.png");
+    background-image: url("hemicycle.png");
     color: #fff;
     margin: 0;
     padding:0;
@@ -89,9 +89,6 @@
     height: 100%;
   }
   </style>
-  <!--[if lt IE 8]>
-    <link rel="stylesheet" href="/assets/stylesheets/social_foundicons_ie7.css">
-  <![endif]-->
 </head>
 <body>
 
@@ -128,6 +125,14 @@
       <a href="?co=SURE" title='<?php echo $array['SURE']; ?>'  class='<?php echo $class["SURE"]; ?>'>SURE</a>&nbsp;&nbsp;
       <a href="?co=TRAN" title='<?php echo $array['TRAN']; ?>'  class='<?php echo $class["TRAN"]; ?>'>TRAN</a>
     </p>
+    
+    <!-- user search field -->
+    <form action="/" method="post" class="search-nodes-form">
+      <fieldset id="search-nodes-fieldset">
+        <div></div>
+      </fieldset>
+    </form>
+    
     <p>
       Click a node to show its ego network. Double click to zoom in or out.<br>
       Hide&nbsp;
@@ -161,9 +166,11 @@
 
 </div>
 
-<script src="/sigmajs-release-v1.0.2/sigma.min.js"></script>
-<script src="/sigmajs-release-v1.0.2/plugins/sigma.parsers.gexf.min.js"></script>
-<script src="/sigmajs-release-v1.0.2/plugins/sigma.layout.forceAtlas2.min.js"></script>
+<script type="text/javascript" src="/assets/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="/assets/jquery.smart_autocomplete.min.js"></script>
+<script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/sigma.min.js"></script>
+<script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/plugins/sigma.parsers.gexf.min.js"></script>
+<script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/plugins/sigma.layout.forceAtlas2.min.js"></script>
 
 <script>
 function decimalAdjust(type, value, exp) {
@@ -302,9 +309,66 @@ sigma.parsers.gexf(
       labelHoverShadow: 'node'
     });
     
-    // Refresh the graph to see the changes:
+    // autocomplete search field
+    //
+    $('#search-nodes-fieldset > div').remove();
+    $('<div>' +
+        '<label for="search-nodes">' +
+          'Search' +
+        '</label>' +
+        '<input type="text" autocomplete="off" id="search-nodes"/>' +
+      '</div>').appendTo('#search-nodes-fieldset');
+
+    $('#search-nodes-fieldset #search-nodes').smartAutoComplete({
+      source: s.graph.nodes().map(function(n){
+        return n.label;
+      })
+    }).bind('itemSelect', function(e) {
+      var label = e.smartAutocompleteData.item.innerText;
+
+      // find node and neighbours
+      var id = 0,
+          nodeId = 0,
+          toKeep = new Array();
+      s.graph.nodes().forEach(function(n) {
+        if (n.label == label) {
+          id = n.id;
+          nodeId = n.id,
+          toKeep = s.graph.neighbors(nodeId);
+        }
+      });
+            
+      // color selected nodes
+      s.graph.nodes().forEach(function(n) {
+        if (n.id == id)
+          n.color = n.originalColor;
+        else if(toKeep[n.id])
+          n.color = '#999';
+        else
+          n.color = '#555';
+      });
+
+      // color selected edges
+      s.graph.edges().forEach(function(e) {
+        if (toKeep[e.source] && toKeep[e.target])
+          e.color = e.originalColor;
+        else
+          e.color = '#333';
+      });
+
+      s.refresh();
+      
+    });
+
+    // protect search field
+    //
+    $('form.search-nodes-form').submit(function(e) {
+      e.preventDefault();
+    });
+       
+    // show it all, finally
     s.refresh();
-    
+
     // hide edges
     //
     document.getElementById('showEdges').addEventListener('change',

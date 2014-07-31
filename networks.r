@@ -113,7 +113,7 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     e = rbind.fill(n)
     names(e) = c("i", "j")
     
-    # edge weights
+    # edge weights (raw counts, undirected network)
     e$w = paste(e$i, e$j, sep = "_")
     count = table(e$w)
     e$w = count[ e$w ]

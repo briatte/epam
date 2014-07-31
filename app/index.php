@@ -134,7 +134,7 @@
     </form>
     
     <p>
-      Click a node to show its ego network. Double click to zoom in or out.<br>
+      Click a node to show its ego network. Double click to zoom in.<br>
       Hide&nbsp;
       <label title="Do not draw network ties (vertex edges).">
         <input type="checkbox" id="showEdges" />

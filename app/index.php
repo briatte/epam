@@ -61,8 +61,14 @@
     "TRAN" => "");
   $class[$co] = "here";
 
-  $caption='<p>This graph shows Members of the European Parliament (MEPs) during the 7th term (2009-2014). A link between two MEPs indicates that they have cosponsored at least one committee amendment. The size of the nodes is proportional to their <a href="http://toreopsahl.com/tnet/weighted-networks/node-centrality/">weighted degree</a>. See <a href="plots.html" target="_blank">this page</a> for more plots.</p>';
-  // $caption = $caption . ' Their size is proportional to their <a href="http://toreopsahl.com/tnet/weighted-networks/node-centrality/">weighted degree</a>.</p>'
+  $caption='<p>This graph shows Members of the European Parliament (MEPs) during the 7th term (2009–2014). ' .
+    'A link between two MEPs indicates that they have cosponsored at least one committee amendment.</p>' .
+    '<div id="details"><h3><i class="fa fa-cube"></i> Details</h3>' .
+    '<p>The graph contains /nodes MPs connected by /edges undirected edges' .
+    ' and sized proportionally to their <a href="http://toreopsahl.com/tnet/weighted-networks/node-centrality/">weighted degree</a> in the network.</p>' .
+    '<p>Each graph is based on the amendments submitted to the committee, ranging from a couple hundred' .
+    ' to several thousands in committees like <a href="?co=AGRI">Agriculture</a> or <a href="?co=ENVI">Environment</a>.</p>' .
+    '<p>Group colors&nbsp;&nbsp; /colortext</p></div>';
   
 ?>
 
@@ -77,7 +83,7 @@
   <meta charset="utf-8">
   <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet" type="text/css" />
   <link href="/assets/styles.css" rel="stylesheet" type="text/css" />
-  <link rel="stylesheet" href="/font-awesome-4.0.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/assets/font-awesome-4.1.0/css/font-awesome.min.css">
   <style type="text/css" media="screen">
   html, body {
     font: 24px/150% "Source Sans Pro", sans-serif;
@@ -89,11 +95,17 @@
     height: 100%;
   }
   </style>
+  <script type="text/javascript" src="/assets/jquery-1.11.1.min.js"></script>
+  <script type="text/javascript" src="/assets/jquery.smart_autocomplete.min.js"></script>
+  <script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/sigma.min.js"></script>
+  <script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/plugins/sigma.parsers.gexf.min.js"></script>
+  <script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/plugins/sigma.layout.forceAtlas2.min.js"></script>
 </head>
 <body>
 
 <div id="sigma-container">
   <div id="controls" class="bg">
+
     <h1>european parliament</h1>    
     <h2><a target='_blank' href='<?php echo "http://parltrack.euwiki.org/committee/" . $co; ?>' title='Go to Parltrack committee page (new window)'><?php echo $array[$co]; ?></a></h2>
 
@@ -132,32 +144,69 @@
         <div></div>
       </fieldset>
     </form>
-    
-    <p>
-      Click a node to show its ego network. Double click to zoom in.<br>
-      Hide&nbsp;
-      <label title="Do not draw network ties (vertex edges).">
-        <input type="checkbox" id="showEdges" />
-        Edges
-      </label>
-      &nbsp;
-      <label title="Do not add labels to nodes (MP names) when zooming in.">
-        <input type="checkbox" id="showLabels" />
-        Labels
-      </label>
-      &nbsp;
-      <label title="Draw only ties formed among frequent cosponsors (edge weight > 0.5).">
-        <input type="checkbox" id="showSparse" />
-        Weak ties
-      </label>
-      <br>
-      Download&nbsp;&nbsp;<i class="fa fa-file-o"></i>&nbsp;&nbsp;<a href="com_<?php echo $co; ?>.gexf" title="Download this graph (GEXF, readable with Gephi)">network</a>&nbsp;&nbsp;<i class="fa fa-files-o"></i>&nbsp;&nbsp;<a href="all.zip" title="Download all graphs (GEXF, readable with Gephi)">full series</a></p>
-    <p><a href="#" id="recenter-camera" class="button" title="Reset graph to initial zoom position.">reset zoom</a>&nbsp;&nbsp;<a href="#" id="toggle-layout" class="button" title="Animate with Force Atlas 2.">Animate</a> <small><a href="https://gephi.org/2011/forceatlas2-the-new-version-of-our-home-brew-layout/" title="Details on the Force Atlas 2 algorithm."><i class="fa fa-info-circle"></i></a></small></p>
-    <p><a href="http://twitter.com/share?text=Cosponsorship%20networks%20in%20the%20European%20Parliament,%20by%20@phnk:&amp;url=<?php echo 'http://' . $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"]; ?>" class="button" title="Share this page on Twitter."><i class="fa fa-twitter"></i> Tweet</a>&nbsp;&nbsp;<a href="https://github.com/briatte/epam" class="button" title="Get the code and data from GitHub."><i class="fa fa-github"></i> Code</a></p>
+
+    <!-- buttons and sources -->
     <footer>
-        <p>Amendments data from <a href="http://parltrack.euwiki.org/dumps/" title="Index of Parltrack /dumps/">Parltrack</a> (May 16, 2014).<br />
-          Background photo by <a href="https://commons.wikimedia.org/wiki/File:EP_Strasbourg_hemicycle_l-gal.jpg">JLogan</a> (Wikimedia).</p>
+
+      <ul>
+        <li>Click a node to show its ego network.</li>
+        <li>Double click the graph to zoom in.</li>
+
+        <!-- show/hide -->
+        <li>
+          Hide&nbsp;
+          <label title="Do not draw network ties (vertex edges).">
+            <input type="checkbox" id="showEdges" />
+            Edges
+          </label>
+          &nbsp;
+          <label title="Do not add labels to nodes (MP names) when zooming in.">
+            <input type="checkbox" id="showLabels" />
+            Labels
+          </label>
+          &nbsp;
+          <label title="Draw only ties formed among frequent cosponsors (above mean edge weight).">
+            <input type="checkbox" id="showSparse" />
+            Weak ties
+          </label>
+        </li>
+      </ul>
+      
+      <p><a href="#" id="recenter-camera" class="button" title="Reset graph to initial zoom position.">reset zoom</a>&nbsp;&nbsp;<a href="#" id="toggle-layout" class="button" title="Animate with Force Atlas 2.">Animate</a> <small><a href="https://gephi.org/2011/forceatlas2-the-new-version-of-our-home-brew-layout/" title="Details on the Force Atlas 2 algorithm."><i class="fa fa-info-circle"></i></a></small></p>
+
+      <p><a href="http://twitter.com/share?text=Cosponsorship%20networks%20in%20the%20@Europarl_EN%20European%20Parliament,%20by%20@phnk:&amp;url=<?php echo 'http://' . $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"]; ?>" class="button" title="Share this page on Twitter."><i class="fa fa-twitter"></i> Tweet</a>&nbsp;&nbsp;<a href="https://github.com/briatte/epam" class="button" title="Get the code and data from GitHub."><i class="fa fa-github"></i> Code</a></p>
+
+      <ul>
+        <li>Data from <a href="http://parltrack.euwiki.org/dumps/" title="Index of Parltrack /dumps/">Parltrack</a> (May 16, 2014)</li>
+
+        <li>Background photo by <a href="https://commons.wikimedia.org/wiki/File:EP_Strasbourg_hemicycle_l-gal.jpg">JLogan</a> (Wikimedia)</li>
+
+        <li>Download&nbsp;&nbsp;
+          <i class="fa fa-file-o"></i>&nbsp;&nbsp;<a href="com_<?php echo $co; ?>.gexf" title="Download this graph (GEXF, readable with Gephi)">network</a>&nbsp;&nbsp;
+          <i class="fa fa-files-o"></i>&nbsp;&nbsp;<a href="all.zip" title="Download all graphs (GEXF, readable with Gephi)">full series</a>&nbsp;&nbsp;
+          <i class="fa fa-file-image-o"></i>&nbsp;&nbsp;<a href="plots.html">plots</a></li>
+            
+      </ul>
+      
+      <div id="menu">
+        <p><i class="fa fa-eye"></i>&nbsp;About</p>
+        <ul>
+          <li><h3>About</h3></li>
+          <li class="intro">This visualization was built with <a href="http://www.r-project.org/" title="The R Project for Statistical Computing">R</a> and <a href="http://sigmajs.org/" title"JavaScript library dedicated to graph drawing">sigma.js</a>.</li>
+          <li>It is part of a series inspired by <a href="http://coulmont.com/blog/2011/09/02/travail-de-deputes/">Baptiste Coulmont</a> and <a href="http://jhfowler.ucsd.edu/cosponsorship.htm">James Fowler</a>.</li>
+          <li class="intro">Follow the links below to take a look at other parliaments.</li>
+          <li><a href="/belparl">Belgium</a></li>
+          <li><a href="/folketinget">Denmark</a></li>
+          <!-- <li><a href="/epam">European Union</a></li> -->
+          <li><a href="/neta">France</a></li>
+          <li><a href="/stortinget">Norway</a></li>
+          <li><a href="/riksdag">Sweden</a></li>
+          <li><a href="/marsad">Tunisia</a></li>
+        </ul>
+      </div>
+      
     </footer>
+
     <div id="graph-container"></div>
   </div>
   <div id="caption" class="bg">
@@ -165,12 +214,6 @@
   </div>
 
 </div>
-
-<script type="text/javascript" src="/assets/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="/assets/jquery.smart_autocomplete.min.js"></script>
-<script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/sigma.min.js"></script>
-<script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/plugins/sigma.parsers.gexf.min.js"></script>
-<script type="text/javascript" src="/assets/sigmajs-release-v1.0.2/plugins/sigma.layout.forceAtlas2.min.js"></script>
 
 <script>
 function decimalAdjust(type, value, exp) {
@@ -224,19 +267,36 @@ sigma.parsers.gexf(
   },
   function(s) {
     
-    console.log(document.title.replace("Cosponsorship networks in the European Parliament: ", "com_")+'.gexf')
-      
-    // We first need to save the original colors of our
-    // nodes and edges, like this:
-    s.graph.nodes().forEach(function(n) {
-      n.originalColor = n.color;
-      n.originalX = n.x;
-      n.originalY = n.y;
-    });
+    // initial edges
     s.graph.edges().forEach(function(e) {
       e.originalColor = e.color;
       e.type = 'arrow';
     });
+    
+    // caption
+    var parties = ["Far-left", "Greens", "Socialists", "Centrists", "Christian-Democrats", "Euroskeptics", "Extreme-right", "Independents"];
+    var colors = new Array(parties.length);
+
+    // initial nodes
+    s.graph.nodes().forEach(function(n) {
+      if(parties.indexOf(n.attributes["group"]) != -1)
+        colors[ jQuery.inArray(n.attributes["group"], parties) ] = n.color;
+      n.originalColor = n.color;
+      n.originalX = n.x;
+      n.originalY = n.y;
+    });
+    
+    // caption text
+    var t = "";
+    for (i = 0; i < parties.length; i++) {
+      if(typeof colors[i] != "undefined")
+        t = t + "&nbsp;<span style='color:" +
+          colors[i].replace('0.3)', '1)').replace('0.5)', '1)') + 
+          "'>" + parties[i].replace(new RegExp(' ', 'g'), '&nbsp;') + "</span> ";
+    };
+        
+    // pass network dimensions and caption
+    document.getElementById('caption').innerHTML = document.getElementById('caption').innerHTML.replace('/nodes', s.graph.nodes().length).replace('/edges', s.graph.edges().length).replace('/colortext', t);
 
     // When a node is clicked, we check for each node
     // if it is a neighbor of the clicked one. If not,
@@ -263,13 +323,25 @@ sigma.parsers.gexf(
           e.color = '#333';
       });
 
-      // node color
-      var rgba = e.data.node.color;
+      var profile = "<a href='http://www.europarl.europa.eu" + e.data.node.attributes['link'] + "' title='Go to EP profile (new window)' target='_blank'>";
+      var parltrack = "<a href='http://parltrack.euwiki.org/mep/" + e.data.node.attributes['label'] + "' title='Go to Parltrack profile (new window)' target='_blank'";
 
-      profile = "<a href='http://www.europarl.europa.eu" + e.data.node.attributes['link'] + "' title='Go to EP profile (new window)' target='_blank'>";
-      parltrack = "<a href='http://parltrack.euwiki.org/mep/" + e.data.node.attributes['label'] + "' title='Go to Parltrack profile (new window)' target='_blank'";
+      // distance
+      var distance = "around " + Math.round10(e.data.node.attributes['distance'], -1);
+      if(isNaN(e.data.node.attributes['distance']))
+        var distance = "impossible to compute (too isolated)";
+
+      // transparency
+      var rgba = e.data.node.color.replace('0.3)', '0.25)').replace('0.5)', '0.25)');
       
-      document.getElementById('caption').innerHTML = '<p style="background:' + rgba + ';">' + profile + '<img src="http://www.europarl.europa.eu/mepphoto/' + e.data.node.attributes['uid'] + '.jpg" alt="no photo available" /></a> You selected <span style="text-transform:uppercase;">' + profile + e.data.node.label + '</a></span> <span style="color:' + rgba.replace('0.3)', '1)') + ';">(' + e.data.node.attributes['group'] + ')</span>, an MEP from ' + e.data.node.attributes['natl'] + ' who had <span title="unweighted Freeman degree">' + s.graph.getNeighborsCount(nodeId) + ' cosponsor(s)</span> in this committee over the entire term.<br /><a href="http://www.europarl.europa.eu' + e.data.node.attributes['link'] + '" class="button"" style="width: 125px; margin:1.25em 0; float:none;" title="Go to EP profile (new window)" target="_blank">EP homepage</a>&nbsp;&nbsp; ' + parltrack + '" class="button" style="width: 175px; margin:1.25em 0; float:none;" target="_blank">Parltrack profile</a></p>';
+      document.getElementById('caption').innerHTML = '<p style="background:' + rgba + ';">' + profile +
+        '<img height="120px" src="http://www.europarl.europa.eu/mepphoto/' + 
+        e.data.node.attributes['uid'] + '.jpg" alt="no photo available" /></a> You selected <span style="text-transform: uppercase;">' + profile + 
+        e.data.node.label + '</a></span> <span style="color:' + rgba.replace('0.25)', '1)') + ';">(' + 
+        e.data.node.attributes['group'] + ')</span>, an MEP from ' + 
+        e.data.node.attributes['natl'] + ' who had <span title="unweighted Freeman degree">' + 
+        s.graph.getNeighborsCount(nodeId) + ' cosponsor(s)</span> in this committee over the entire term.<br /><a href="http://www.europarl.europa.eu' + 
+        e.data.node.attributes['link'] + '" class="button" style="width:125px; margin:1.25em 0; float:none;" title="Go to EP profile (new window)" target="_blank">EP homepage</a>&nbsp;&nbsp; ' + parltrack + '" class="button" style="width: 175px; margin:1.25em 0; float:none;" target="_blank">Parltrack profile</a></p>';
       
       // Since the data has been modified, we need to
       // call the refresh method to make the colors
@@ -405,27 +477,32 @@ sigma.parsers.gexf(
     //
     document.getElementById('showSparse').addEventListener('change', 
     function(e){
+      var sum = 0;
+      s.graph.edges().forEach(function(e) {
+        sum = sum + e.weight;
+      });
+      sum = sum / s.graph.edges().length;
       if (e.target.checked) {
         s.graph.edges().forEach(function(e) {
           // use upper quartile marker
-          if(e.weight > 1)
+          if(e.weight < sum)
             e.color = 'rgba(66,66,66,0)';
         });
         s.settings({
-          minEdgeSize: .1,
-          maxEdgeSize: 3
+          minEdgeSize: 0,
+          maxEdgeSize: 2.7
         });
       } else {
         s.graph.edges().forEach(function(e) {
           e.color = e.originalColor;
         });
         s.settings({
-          minEdgeSize: .5,
-          maxEdgeSize: 1,
+          minEdgeSize: .3,
+          maxEdgeSize: .9,
         });
       }
       s.refresh();
-    }); 
+    });
         
     // force atlas
     //

@@ -179,6 +179,7 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     
     colors = t(col2rgb(groups[ names(groups) %in% as.character(n %v% "group") ]))
     
+    # placement method (Kamada-Kawai best at separating at reasonable distances)
     mode = "fruchtermanreingold"
     meta = list(creator = "rgexf",
                 description = paste0(mode, " placement"),
@@ -207,7 +208,6 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     
     net = as.matrix.network.adjacency(n)
     
-    # placement method (Kamada-Kawai best at separating at reasonable distances)
     position = paste0("gplot.layout.", mode)
     if(!exists(position)) stop("Unsupported placement method '", position, "'")
     
@@ -356,6 +356,6 @@ ggsave("plots/density.pdf", g, width = 10, height = 9)
 ggsave("plots/density.png", g, width = 10, height = 9)
 
 if(zip)
-  zip("all.zip", paste0("data/", dir("data", "gexf")))
+  zip("epam.zip", paste0("data/", dir("data", "gexf")))
 
 # have a nice day

@@ -4,9 +4,7 @@
 *.pdf
 *.docx
 
-## temporary
-blog/rpol.md
-
+blog
 draft
 dumps
 paper

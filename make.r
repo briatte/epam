@@ -25,12 +25,10 @@ library(rgexf)
 
 # plots
 
-library(devtools)
 library(ggplot2)
 library(reshape2)
 library(scales)
-
-source_url("https://raw.githubusercontent.com/briatte/ggnet/master/ggnet.R")
+library(GGally)
 
 source("data.r")
 source("networks.r")

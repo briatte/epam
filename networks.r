@@ -3,7 +3,7 @@
 #' @references http://www.europarl.europa.eu/committees/en/full-list.html
 load("data/amdts.rda")
 
-plot = FALSE
+plot = TRUE
 gexf = TRUE
 zip = TRUE
 
@@ -120,7 +120,10 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     e = unique(e)
     
     n = network(e[, 1:2 ], directed = FALSE)
-    n %n% "meta" = i
+    n %n% "title" = i
+    n %n% "n_amendments" = nrow(d)
+    n %n% "amendments" = table(d$n_au)
+    n %n% "p_cosponsored" = nrow(subset(data, committee == i)) / nrow(d)
     
     network::set.edge.attribute(n, "source", as.character(e[, 1]))
     network::set.edge.attribute(n, "target", as.character(e[, 2]))
@@ -182,61 +185,41 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     # placement method (Kamada-Kawai best at separating at reasonable distances)
     mode = "fruchtermanreingold"
     meta = list(creator = "rgexf",
-                description = paste0(mode, " placement"),
-                keywords = "Parliament, European Union")
+                description = paste(mode, "placement", nrow(d), "amendments"),
+                keywords = "parliament, european union")
     
-    people = sponsors[ network.vertex.names(n), ]
-    people[ tolower(network.vertex.names(n)), "degree" ] = n %v% "degree"
+    node.att = sponsors[ network.vertex.names(n), c("id", "name", "group", "natl", "link") ]
+    node.att$group = as.character(node.att$group)
+    node.att$natl = countries[ node.att$natl ]
     
-    node.att = c("name", "group", "natl", "link", "id", "degree")
-    node.att = cbind(label = tolower(people$name), people[, node.att ])
-    
-    people = data.frame(id = as.numeric(factor(tolower(people$name))),
-                        label = tolower(people$name),
-                        stringsAsFactors = FALSE)
+    people = data.frame(id = as.numeric(factor(node.att$name)),
+                        label = node.att$name, stringsAsFactors = FALSE)
     
     relations = data.frame(
-      source = as.numeric(factor(n %e% "source", levels = levels(factor(people$label)))),
-      target = as.numeric(factor(n %e% "target", levels = levels(factor(people$label)))),
+      source = as.numeric(factor(n %e% "source", levels = levels(factor(tolower(people$label))))),
+      target = as.numeric(factor(n %e% "target", levels = levels(factor(tolower(people$label))))),
       weight = n %e% "weight"
     )
     relations = na.omit(relations)
     
+    # check all weights are positive after rounding
+    stopifnot(all(relations$weight > 0))
+    
     nodecolors = lapply(node.att$group, function(x)
-      data.frame(r = rgb[x, 1], g = rgb[x, 2], b = rgb[x, 3], a = .3 ))
+      data.frame(r = rgb[x, 1], g = rgb[x, 2], b = rgb[x, 3], a = .5))
     nodecolors = as.matrix(rbind.fill(nodecolors))
     
-    net = as.matrix.network.adjacency(n)
-    
-    position = paste0("gplot.layout.", mode)
-    if(!exists(position)) stop("Unsupported placement method '", position, "'")
-    
-    position = do.call(position, list(net, NULL))
-    position = as.matrix(cbind(position, 1))
+    # node placement
+    position = do.call(paste0("gplot.layout.", mode),
+                       list(as.matrix.network.adjacency(n), NULL))
+    position = as.matrix(cbind(round(position, 1), 1))
     colnames(position) = c("x", "y", "z")
-    
-    # compress floats
-    position[, "x"] = round(position[, "x"], 2)
-    position[, "y"] = round(position[, "y"], 2)
-    
-    node.att$group = as.character(node.att$group)
-    people$label = toupper(people$label)
-    node.att$label = toupper(node.att$label)
-    
-    write.gexf(nodes = people,
-               edges = relations[, -3],
-               edgesWeight = relations[, 3],
-               nodesAtt = data.frame(label = node.att$label,
-                                     name = node.att$name,
-                                     group = node.att$group,
-                                     natl = countries[ node.att$natl ],
-                                     uid = node.att$id,
-                                     link = node.att$link,
-                                     stringsAsFactors = FALSE),
-               nodesVizAtt = list(position = position,
-                                  color = nodecolors,
-                                  size = round(node.att$degree)),
-               # edgesVizAtt = list(size = relations[, 3]),
+
+    # save with compressed floats
+    write.gexf(nodes = people, nodesAtt = node.att,
+               edges = relations[, 1:2 ], edgesWeight = relations[, 3],
+               nodesVizAtt = list(position = position, color = nodecolors,
+                                  size = round(n %v% "degree", 1)),
                defaultedgetype = "undirected", meta = meta,
                output = gsub(".rda", ".gexf", file))
     
@@ -356,6 +339,6 @@ ggsave("plots/density.pdf", g, width = 10, height = 9)
 ggsave("plots/density.png", g, width = 10, height = 9)
 
 if(zip)
-  zip("epam.zip", paste0("data/", dir("data", "gexf")))
+  zip("epam.zip", paste0("data/", dir("data", "gexf$")))
 
 # have a nice day

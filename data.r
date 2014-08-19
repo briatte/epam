@@ -460,6 +460,25 @@ if(!file.exists("data/amdts.rda")) {
   
 }
 
+meps$photo = NA
+
+# download photos
+cat("Downloading photos for", length(unique(meps$id)), "MEPs...\n")
+for(i in unique(meps$id)) {
+  photo = paste0("photos/", i, ".jpg")
+  if(!file.exists(photo) | !file.info(photo)$size) {
+    try(download.file(paste0("http://www.europarl.europa.eu/mepphoto/", i, ".jpg"),
+                      photo, mode = "wb", quiet = TRUE), silent = TRUE)
+  }
+  if(!file.exists(photo) | !file.info(photo)$size) {
+    file.remove(photo) # will warn if missing
+    meps$photo[ meps$id == i ] = NA
+  } else {
+    meps$photo[ meps$id == i ] = i
+  }
+  
+}
+
 save(data, meps, nfo, file = "data/amdts.rda")
 
 # kthxbye

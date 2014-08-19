@@ -7,7 +7,21 @@ plot = TRUE
 gexf = TRUE
 zip = TRUE
 
-sponsors = unique(meps[, c("link", "name", "id", "group", "natl", "nb_mandates") ])
+groups = c(
+  "Far-left" = "#E41A1C",
+  "Greens" = "#4DAF4A",
+  "Socialists" = "#F781BF",
+  "Centrists" = "#FF7F00",
+  "Christian-Democrats" = "#377EB8",
+  "Euroskeptics" = "#984EA3",
+  "Extreme-right" = "#A65628",
+  "Independents" = "#999999")
+
+order = names(groups)
+
+rgb = t(col2rgb(groups))
+
+sponsors = unique(meps[, c("link", "name", "id", "group", "natl", "photo") ])
 sponsors$group = factor(sponsors$group, levels = names(groups), ordered = TRUE)
 rownames(sponsors) = tolower(sponsors$name)
 
@@ -40,18 +54,6 @@ countries = c(
   "se" = "Sweden",
   "si" = "Slovenia",
   "sk" = "Slovakia")
-
-groups = c(
-  "Far-left" = "#E41A1C",
-  "Greens" = "#4DAF4A",
-  "Socialists" = "#F781BF",
-  "Centrists" = "#FF7F00",
-  "Christian-Democrats" = "#377EB8",
-  "Euroskeptics" = "#984EA3",
-  "Extreme-right" = "#A65628",
-  "Independents" = "#999999")
-
-rgb = t(col2rgb(groups))
 
 titles = c("AFCO" = "Constitutional Affairs",
            "AFET" = "Foreign Affairs",
@@ -90,7 +92,7 @@ for(i in names(coms)[ order(sort(coms)) ]) {
   cat(i, titles[ i ], ":", total, "sponsorships ... ")
   
   file = paste0("data/com_", i, ".rda")
-  if(!file.exists(file)) {
+  if(!file.exists(file) | 1) {
     
     n = lapply(tolower(d$authors), function(x) {
       
@@ -121,9 +123,9 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     
     n = network(e[, 1:2 ], directed = FALSE)
     n %n% "title" = i
+
     n %n% "n_amendments" = nrow(d)
-    n %n% "amendments" = table(d$n_au)
-    n %n% "p_cosponsored" = nrow(subset(data, committee == i)) / nrow(d)
+    n %n% "n_sponsors" = table(subset(data, committee == i)$n_au)
     
     network::set.edge.attribute(n, "source", as.character(e[, 1]))
     network::set.edge.attribute(n, "target", as.character(e[, 2]))
@@ -131,8 +133,10 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     network::set.edge.attribute(n, "alpha", as.numeric(cut(n %e% "weight", c(1:4, Inf), include.lowest = TRUE)) / 5)
     
     n %v% "group" = as.character(sponsors[ tolower(network.vertex.names(n)), "group" ])
-    n %v% "natl" = as.character(sponsors[ tolower(network.vertex.names(n)), "natl" ])
-    n %v% "nb_mandates" = as.character(sponsors[ tolower(network.vertex.names(n)), "nb_mandates" ])
+    n %v% "nat" = as.vector(countries[ as.character(sponsors[ tolower(network.vertex.names(n)), "natl" ]) ])
+    n %v% "url" = gsub("/meps/en/|_home\\.html", "", sponsors[ tolower(network.vertex.names(n)), "link" ])
+    n %v% "photo" = as.character(sponsors[ tolower(network.vertex.names(n)), "photo" ])
+    # n %v% "nb_mandates" = as.character(sponsors[ tolower(network.vertex.names(n)), "nb_mandates" ])
     
     # weighted adjacency matrix to tnet
     tnet = as.tnet(as.sociomatrix(n, attrname = "weight"), type = "weighted one-mode tnet")
@@ -161,20 +165,56 @@ for(i in names(coms)[ order(sort(coms)) ]) {
   load(file)
   cat(network.size(n), "nodes", network.edgecount(n), "edges\n")
   
+  # edge colors
+  
+  ii = groups[ sponsors[ n %e% "source", "group" ] ]
+  jj = groups[ sponsors[ n %e% "target", "group" ] ]
+  
+  party = as.vector(ii)
+  party[ ii != jj ] = "#AAAAAA"
+  
+  print(table(n %v% "group", exclude = NULL))
+  
+  # number of amendments cosponsored
+  na = sapply(network.vertex.names(n), function(x) {
+    sum(grepl(x, d$authors, ignore.case = TRUE)) # ids are unique names
+  })
+  n %v% "n_amendments" = as.vector(na)
+
   if(plot) {
 
-    g = ggnet(n, segment.color = groups[ sponsors[ e$i, "group" ] ],
-              segment.alpha = n %e% "alpha",
-              node.group = n %v% "group", node.color = groups[ unique(n %v% "group") ], size = 0) +
-      scale_color_manual("", values = groups, breaks = names(groups)) +
-      scale_alpha_discrete() +
-      geom_point(size = 9, alpha = 1/3) +
-      geom_point(size = 6, alpha = 1/2) +
-      labs(title = paste0(titles[ i ], " (", i, ")")) +
-      theme(legend.position = "bottom")
+    q = unique(quantile(n %v% "degree")) # safer
+    n %v% "size" = as.numeric(cut(n %v% "degree", q, include.lowest = TRUE))
+    g = suppressWarnings(ggnet(n, size = 0, segment.alpha = 1/2, # mode = "kamadakawai",
+                               segment.color = party) +
+                           geom_point(alpha = 1/3, aes(size = n %v% "size", color = n %v% "group")) +
+                           geom_point(alpha = 1/2, aes(size = min(n %v% "size"), color = n %v% "group")) +
+                           scale_size_continuous(range = c(6, 12)) +
+                           scale_color_manual("", values = groups, breaks = order) +
+                           labs(title = paste0(titles[ i ], " (", i, ")")) +
+                           theme(#legend.key = element_blank(),
+                             legend.position = "bottom",
+                             legend.key.size = unit(1, "cm"),
+                             legend.text = element_text(size = 16)) +
+                           guides(size = FALSE, color = guide_legend(override.aes = list(alpha = 1/3, size = 6))))
     
-    ggsave(paste0("plots/", i, ".pdf"), g, width = 11, height = 11)
-    ggsave(paste0("plots/", i, ".jpg"), g + labs(title = NULL) + guides(color = FALSE), width = 6, height = 6)
+    print(g)
+    
+    ## unweighted, colored by edge source
+    
+    #     g = ggnet(n, segment.color = groups[ sponsors[ e$i, "group" ] ],
+    #               segment.alpha = n %e% "alpha",
+    #               node.group = n %v% "group", node.color = groups[ unique(n %v% "group") ], size = 0) +
+    #       scale_color_manual("", values = groups, breaks = names(groups)) +
+    #       scale_alpha_discrete() +
+    #       geom_point(size = 9, alpha = 1/3) +
+    #       geom_point(size = 6, alpha = 1/2) +
+    #       labs(title = paste0(titles[ i ], " (", i, ")")) +
+    #       theme(legend.position = "bottom")
+    
+    ggsave(paste0("plots/", i, ".pdf"), g, width = 12, height = 12)
+    ggsave(paste0("plots/", i, ".jpg"), g + labs(title = NULL) + theme(legend.position = "none"), 
+           width = 9, height = 9, dpi = 72)
     
   }
   
@@ -188,18 +228,22 @@ for(i in names(coms)[ order(sort(coms)) ]) {
                 description = paste(mode, "placement", nrow(d), "amendments"),
                 keywords = "parliament, european union")
     
-    node.att = sponsors[ network.vertex.names(n), c("id", "name", "group", "natl", "link") ]
-    node.att$group = as.character(node.att$group)
-    node.att$natl = countries[ node.att$natl ]
-    
-    people = data.frame(id = as.numeric(factor(node.att$name)),
-                        label = node.att$name, stringsAsFactors = FALSE)
+    node.att = data.frame(
+      group = n %v% "group",
+      amendments = n %v% "n_amendments",
+      nat = n %v% "nat",
+      url = n %v% "url",
+      photo = n %v% "photo",
+      distance = round(n %v% "distance", 1),
+      stringsAsFactors = FALSE)
+        
+    people = data.frame(id = as.numeric(factor(sponsors[ network.vertex.names(n), "name" ])),
+                        label = sponsors[ network.vertex.names(n), "name" ], stringsAsFactors = FALSE)
     
     relations = data.frame(
       source = as.numeric(factor(n %e% "source", levels = levels(factor(tolower(people$label))))),
       target = as.numeric(factor(n %e% "target", levels = levels(factor(tolower(people$label))))),
-      weight = n %e% "weight"
-    )
+      weight = round(n %e% "weight", 2)) # , count = n %e% "count"
     relations = na.omit(relations)
     
     # check all weights are positive after rounding
@@ -221,7 +265,7 @@ for(i in names(coms)[ order(sort(coms)) ]) {
                nodesVizAtt = list(position = position, color = nodecolors,
                                   size = round(n %v% "degree", 1)),
                defaultedgetype = "undirected", meta = meta,
-               output = gsub(".rda", ".gexf", file))
+               output = gsub("data/", "", gsub(".rda", ".gexf", file)))
     
   }
 
@@ -250,6 +294,7 @@ for(i in names(coms)[ order(sort(coms)) ]) {
     V(inet)$group = factor(s[ V(inet)$name ])
     print(table(V(inet)$group, exclude = NULL))
     
+    # keeping Independents as a political group
     inet = inet - which(is.na(V(inet)$group))
     
     # modularity
@@ -339,6 +384,6 @@ ggsave("plots/density.pdf", g, width = 10, height = 9)
 ggsave("plots/density.png", g, width = 10, height = 9)
 
 if(zip)
-  zip("epam.zip", paste0("data/", dir("data", "gexf$")))
+  zip("net_eu.zip", dir(pattern = "gexf$"))
 
 # have a nice day

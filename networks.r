@@ -92,7 +92,7 @@ for(i in names(coms)[ order(sort(coms)) ]) {
   cat(i, titles[ i ], ":", total, "sponsorships ... ")
   
   file = paste0("data/com_", i, ".rda")
-  if(!file.exists(file) | 1) {
+  if(!file.exists(file)) {
     
     n = lapply(tolower(d$authors), function(x) {
       

@@ -9,26 +9,25 @@ dir.create("plots" , showWarnings = FALSE)
 # parser
 
 library(jsonlite)
-library(XML)
 library(qdap)
 library(stringr)
 library(plyr)
-library(dplyr)
+library(XML)
+library(dplyr) # keep last
 
 # networks
 
+library(igraph) # keep first
 library(network)
 library(sna)
-library(tnet)
-library(igraph)
 library(rgexf)
+library(tnet)
 
 # plots
 
-library(ggplot2)
-library(reshape2)
-library(scales)
 library(GGally)
+library(ggplot2)
+library(grid) # for unit()
 
 source("data.r")
 source("networks.r")
